@@ -22,6 +22,10 @@
 
 var path = require('path'),
     help = require('./help'),
+    cordova_lib = require('cordova-lib'),
+    CordovaError = cordova_lib.CordovaError,
+    cordova = cordova_lib.cordova,
+    plugman = cordova_lib.plugman,
     nopt, 
     _;
 
@@ -45,14 +49,39 @@ function init() {
     }
 };
 
-// Add handlers for verbose logging.
-function initVerboseHandlers() {
+/**
+ *
+ * set up event handlers for logging and results emitted as events.
+ */
+function initLogHandlers() {
+    cordova.on('results', console.log);
+
+    if ( !args.silent ) {
+        cordova.on('log', console.log);
+        cordova.on('warn', console.warn);
+        plugman.on('log', console.log);
+        plugman.on('results', console.log);
+        plugman.on('warn', console.warn);
+    }
+
+    // Add handlers for verbose logging
     if (args.verbose) {
         cordova.on('verbose', console.log);
         plugman.on('verbose', console.log);
     }
 
+    // For CrodovaError print only the message without stack trace.
+    process.on('uncaughtException', function(err){
+        if ( (err instanceof CordovaError) && !args.verbose ) {
+            console.error(err.message);
+        } else {
+            console.error(err.stack);
+        }
+        process.exit(1);
+    });
 };
+
+
 
 
 module.exports = cli
@@ -95,33 +124,6 @@ function cli(inputArgs) {
         return
     }
 
-    var cordova_lib = require('cordova-lib'),
-        CordovaError = cordova_lib.CordovaError,
-        cordova = cordova_lib.cordova,
-        plugman = cordova_lib.plugman;
-
-
-    // For CrodovaError print only the message without stack trace.
-    process.on('uncaughtException', function(err){
-        if ( (err instanceof CordovaError) && !args.verbose ) {
-            console.error(err.message);
-        } else {
-            console.error(err.stack);
-        }
-        process.exit(1);
-    });
-
-
-    // Set up event handlers for logging and results emitted as events.
-    cordova.on('results', console.log);
-
-    if ( !args.silent ) {
-        cordova.on('log', console.log);
-        cordova.on('warn', console.warn);
-        plugman.on('log', console.log);
-        plugman.on('results', console.log);
-        plugman.on('warn', console.warn);
-    }
 
     // TODO: Example wanted, is this functionality ever used?
     // If there were arguments protected from nopt with a double dash, keep
@@ -192,8 +194,10 @@ function cli(inputArgs) {
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
+
         var port = undashed[1]
         cordova.raw.serve(port).done();
+
     } else if (cmd == 'create') {
         var cfg = {};
         // If we got a fourth parameter, consider it to be JSON to init the config.
