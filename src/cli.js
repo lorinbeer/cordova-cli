@@ -53,7 +53,10 @@ function init() {
  *
  * set up event handlers for logging and results emitted as events.
  */
-function initLogHandlers() {
+function initLogHandlers(args) {
+    
+    init();
+
     cordova.on('results', console.log);
 
     if ( !args.silent ) {
@@ -80,9 +83,6 @@ function initLogHandlers() {
         process.exit(1);
     });
 };
-
-
-
 
 module.exports = cli
 function cli(inputArgs) {
@@ -115,9 +115,19 @@ function cli(inputArgs) {
         , 'src' : '--copy-from'
         }
 
+    init();
+
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv
+
+
     var args = nopt(knownOpts, shortHands, inputArgs)
+
+
+    initLogHandlers(args);
+
+
+
 
     if (args.version) {
         console.log( require('../package').version );
@@ -194,10 +204,8 @@ function cli(inputArgs) {
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
-
         var port = undashed[1]
         cordova.raw.serve(port).done();
-
     } else if (cmd == 'create') {
         var cfg = {};
         // If we got a fourth parameter, consider it to be JSON to init the config.

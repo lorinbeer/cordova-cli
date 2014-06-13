@@ -36,6 +36,7 @@ describe("cordova cli", function () {
     describe("options", function () {
         describe("version", function () {
             var version = require("../package").version;
+
             beforeEach(function () {
                 spyOn(console, "log");
             });
