@@ -45,6 +45,16 @@ function init() {
     }
 };
 
+// Add handlers for verbose logging.
+function initVerboseHandlers() {
+    if (args.verbose) {
+        cordova.on('verbose', console.log);
+        plugman.on('verbose', console.log);
+    }
+
+};
+
+
 module.exports = cli
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
@@ -111,12 +121,6 @@ function cli(inputArgs) {
         plugman.on('log', console.log);
         plugman.on('results', console.log);
         plugman.on('warn', console.warn);
-    }
-
-    // Add handlers for verbose logging.
-    if (args.verbose) {
-        cordova.on('verbose', console.log);
-        plugman.on('verbose', console.log);
     }
 
     // TODO: Example wanted, is this functionality ever used?
