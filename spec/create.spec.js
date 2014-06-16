@@ -17,7 +17,7 @@
     under the License.
 */
 
-var cli = require("../src/create.js"),
+var clicreate = require("../src/create.js"),
     Q = require('q'),
     cordova_lib = require('cordova-lib'),
     plugman = cordova_lib.plugman,
@@ -38,17 +38,38 @@ describe("cordova cli", function () {
         describe("parseConfig", function() { 
 
             it("should be defined", function () {
-                expect(cdvclicreate.parseConfig).toEqual(jasmine.any(Function));    
+                expect(clicreate.parseConfig).toEqual(jasmine.any(Function));    
             });
+
+            it("should return an empty object if the argument resolves to false", function () {
+               expect(clicreate.parseConfig()).toEqual({}); 
+               expect(clicreate.parseConfig(false)).toEqual({}); 
+               expect(clicreate.parseConfig(undefined)).toEqual({}); 
+            });
+
+            it("should print an error message on unparseable string (invalid json)", function () {
+                // fail string
+                var cannot = '{boris":"I can break her codes!}';
+   
+                clicreate.parseConfig(cannot);
+            });
+
+            it("should return an object on parseable json", function () {
+                var can = '{"boris":"I Am Invincible!!"}',   // success string
+                    obj = {boris:"I am Invincible!!"};       // matching object 
+
+                expect(clicreate.parseConfig(can)).toEqual(obj);
+            });
+
 
         });
 
         describe("create", function() { 
 
             it("should be defined", function () {
-                expect(cdvclicreate.create).toEqual(jasmine.any(Function));    
+                expect(clicreate.create).toEqual(jasmine.any(Function));    
             });
 
         });
     });
-};
+});
